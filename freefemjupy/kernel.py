@@ -14,7 +14,6 @@ class FreeFemJupyter(Kernel):
         'version': '1.0',
         'name': 'c++',
         'mimetype': 'text/x-freefem',
-        'pygments_lexer': 'c++'
     }
 
     name = 'FreeFemJupyter'
@@ -32,15 +31,15 @@ class FreeFemJupyter(Kernel):
             
             freefem = self.freefem.execute(code)
 
-            html = freefem['output'].replace("\n", "<br>")      
+            html = freefem['output']#replace("\n", "<br>")      
                     
             display_data = {
-                'data' : {'text/html' : html},
+                'data' : {'text/plain' : html},
                 'metadata' : {},
                 'execution_count' : self.execution_count
             }
                     
-            self.send_response(self.iopub_socket, 'execute_result', display_data)
+            self.send_response(self.iopub_socket, 'display_data', display_data)
 
             for graphic in freefem['graphics']:
                 if graphic == None:
@@ -52,7 +51,12 @@ class FreeFemJupyter(Kernel):
                     'data' : {
                         'image/png' : base64.b64encode(buff.getvalue()).decode()
                     },
-                    'metadata' : {},
+                    'metadata' : {
+                        'image/png' : {
+                            'width': 640,
+                            'height': 480
+                        }
+                    },
                     'execution_count' : self.execution_count
                 }
 
