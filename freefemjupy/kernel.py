@@ -3,6 +3,7 @@ import base64
 from io import BytesIO
 from ipykernel.kernelbase import Kernel
 from freefemjupy.pyfreemfem import pyfreefem
+from matplotlib.pyplot import imshow
 
 class FreeFemJupyter(Kernel):
     implementation = 'FreeFem++'
@@ -11,10 +12,9 @@ class FreeFemJupyter(Kernel):
 
     language_info = {
         'version': '1.0',
-        'name': 'FreeFem++',
+        'name': 'c++',
         'mimetype': 'text/x-freefem',
-        'pygments_lexer': 'c',
-
+        'pygments_lexer': 'c++'
     }
 
     name = 'FreeFemJupyter'
@@ -34,14 +34,6 @@ class FreeFemJupyter(Kernel):
 
             html = freefem['output'].replace("\n", "<br>")      
                     
-            #stream_content = {'name': 'stdout', 'text': html}
-            #self.send_response(self.iopub_socket, 'stream', stream_content)
-            for graphic in freefem['graphics']:
-                buff = BytesIO()
-                graphic.save(buff, format="PNG")
-
-                html += "<img src=\"data:image/png;base64,{}\"/>".format(base64.b64encode(buff.getvalue()).decode())
-
             display_data = {
                 'data' : {'text/html' : html},
                 'metadata' : {},
@@ -49,6 +41,23 @@ class FreeFemJupyter(Kernel):
             }
                     
             self.send_response(self.iopub_socket, 'execute_result', display_data)
+
+            for graphic in freefem['graphics']:
+                if graphic == None:
+                    continue
+                buff = BytesIO()
+                graphic.save(buff, format="PNG", optimize=True, dpi=(1024, 1024))
+
+                display_data = {
+                    'data' : {
+                        'image/png' : base64.b64encode(buff.getvalue()).decode()
+                    },
+                    'metadata' : {},
+                    'execution_count' : self.execution_count
+                }
+
+                self.send_response(self.iopub_socket, 'display_data', display_data)
+
 
         return {
             'status': 'ok',

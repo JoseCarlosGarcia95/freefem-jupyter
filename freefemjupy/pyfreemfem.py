@@ -97,7 +97,7 @@ class pyfreefem:
             return None
 
         img = Image.open(file)
-
+        img.load(scale=2)
         os.unlink(file)
         return img
 
@@ -127,15 +127,21 @@ class pyfreefem:
 
         tmpedp = self.preprocess_edp(path)
         execution.append(tmpedp)
-        execution.append('-ng') # No graphics window.
+
+        tmp = open(tmpedp, 'r')
+        src = tmp.read()
+        tmp.close()
+        
+        if not 'mesh3' in src:
+            execution.append('-ng') # No graphics window.
 
         args = tuple(execution)
-
         
         popen = subprocess.Popen(args, stdout=subprocess.PIPE)
         popen.wait()
         output = popen.stdout.read()
 
+        
         os.unlink(tmpedp)
 
         graphics = list(map(self.process_postscript, self.runtime_graphics))
