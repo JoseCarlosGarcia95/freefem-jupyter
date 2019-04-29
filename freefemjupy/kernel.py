@@ -13,6 +13,8 @@ class FreeFemJupyter(Kernel):
         'version': '1.0',
         'name': 'FreeFem++',
         'mimetype': 'text/x-freefem',
+        'pygments_lexer': 'c',
+
     }
 
     name = 'FreeFemJupyter'
